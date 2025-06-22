@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { InvitationModule } from './invitation/invitation.module';
+import { TemplateDesignModule } from './template-design/template-design.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -23,6 +24,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     AuthModule,
     UserModule,
     InvitationModule,
+    TemplateDesignModule,
   ],
 })
 export class AppModule {}

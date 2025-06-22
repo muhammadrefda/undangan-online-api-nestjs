@@ -5,8 +5,10 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
+import { TemplateDesign } from '../template-design/template-design.entity';
 
 @Entity()
 export class Invitation {
@@ -45,4 +47,13 @@ export class Invitation {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => TemplateDesign, (template) => template.invitations, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'templateDesignId' })
+  templateDesign: TemplateDesign;
+
+  @Column({ nullable: true })
+  templateDesignId: number;
 }
