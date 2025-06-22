@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Invitation } from '../invitation/invitation.entity';
 
 @Entity('users')
 export class User {
@@ -16,4 +17,7 @@ export class User {
 
   @Column()
   provider: string;
+
+  @OneToMany(() => Invitation, (invitation) => invitation.user)
+  invitations: Invitation[];
 }

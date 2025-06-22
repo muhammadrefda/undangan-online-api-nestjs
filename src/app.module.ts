@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { InvitationModule } from './invitation/invitation.module';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
@@ -17,11 +17,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User],
+      entities: [__dirname + '/**/*.entity.{js,ts}'],
       synchronize: true,
     }),
     AuthModule,
     UserModule,
+    InvitationModule,
   ],
 })
 export class AppModule {}
