@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TemplateDesignService } from './template-design.service';
 import { TemplateDesign } from './template-design.entity';
@@ -24,6 +25,20 @@ export class TemplateDesignController {
     return this.templateService.findAll();
   }
 
+  @Get('categories')
+  getCategories() {
+    return [
+      { key: 'semua', label: 'Semua' },
+      { key: 'premium', label: 'Premium' },
+      { key: 'eksklusif', label: 'Eksklusif' },
+    ];
+  }
+
+  @Get()
+  findByCategory(@Query('category') category?: string) {
+    return this.templateService.findByCategory(category);
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.templateService.findById(+id);
@@ -38,4 +53,11 @@ export class TemplateDesignController {
   remove(@Param('id') id: string) {
     return this.templateService.remove(+id);
   }
+  // @Get()
+  // getTemplates(@Query('category') category?: string) {
+  //   if (category) {
+  //     return this.templateService.find({ where: { category } });
+  //   }
+  //   return this.templateService.find();
+  // }
 }

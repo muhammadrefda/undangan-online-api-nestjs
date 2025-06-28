@@ -18,6 +18,9 @@ export class TemplateDesign {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ type: 'varchar', length: 20 })
+  category: string;
+
   @OneToMany(() => Invitation, (invitation) => invitation.templateDesign)
   invitations: Invitation[];
 }

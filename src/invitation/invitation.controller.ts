@@ -53,4 +53,14 @@ export class InvitationController {
   findBySlug(@Param('slug') slug: string) {
     return this.invitationService.findBySlug(slug);
   }
+
+  @Get('categories')
+  getCategories() {
+    return [
+      { key: 'semua', label: 'Semua' },
+      { key: 'premium', label: 'Premium' },
+      { key: 'eksklusif', label: 'Eksklusif' },
+      { key: 'gratis', label: 'Gratis' },
+    ];
+  }
 }

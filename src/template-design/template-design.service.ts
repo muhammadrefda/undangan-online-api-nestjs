@@ -40,4 +40,11 @@ export class TemplateDesignService {
     const template = await this.findById(id);
     await this.templateRepo.remove(template);
   }
+
+  async findByCategory(category?: string): Promise<TemplateDesign[]> {
+    if (!category || category === 'semua') {
+      return this.templateRepo.find();
+    }
+    return this.templateRepo.find({ where: { category } });
+  }
 }
