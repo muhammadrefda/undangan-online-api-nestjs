@@ -54,6 +54,11 @@ export class AuthService {
     return this._createToken(user.id, user.email);
   }
 
+  // untuk Google OAuth
+  async googleLogin(user: User) {
+    return this._createToken(user.id, user.email);
+  }
+
   private _createToken(userId: number, email: string) {
     const payload = { sub: userId, email };
     return { access_token: this.jwtService.sign(payload) };
