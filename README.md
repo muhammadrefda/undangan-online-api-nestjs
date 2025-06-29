@@ -57,6 +57,15 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Midtrans Setup
+
+Configure the following environment variables before running the server:
+
+```bash
+MIDTRANS_SERVER_KEY=your-server-key
+MIDTRANS_IS_PRODUCTION=false # set to true in production
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
