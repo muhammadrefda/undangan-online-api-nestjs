@@ -1,31 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { randomBytes } from 'crypto';
+import { Injectable } from '@nestjs/common';
+import * as midtransClient from 'midtrans-client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PaymentService {
-  private readonly logger = new Logger(PaymentService.name);
-  private ethers: any | null = null;
+  private snap: midtransClient.Snap;
 
-  constructor() {
-    try {
-      this.ethers = require('ethers');
-    } catch (err) {
-      this.logger.warn('Ethers library not installed, falling back to random address generation');
-    }
+  constructor(private configService: ConfigService) {
+    this.snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: this.configService.get('SERVER_KEY'),
+      clientKey: this.configService.get('CLIENT_KEY'),
+    });
   }
 
-  createPayment(amount: number) {
-    let address: string;
-    if (this.ethers) {
-      address = this.ethers.Wallet.createRandom().address;
-    } else {
-      address = '0x' + randomBytes(20).toString('hex');
-    }
-    return { address, amount };
-  }
+  async createTransaction(
+    orderId: string,
+    grossAmount: number,
+    name: string,
+    email: string,
+  ) {
+    const parameter = {
+      transaction_details: {
+        order_id: orderId,
+        gross_amount: grossAmount,
+      },
+      customer_details: {
+        first_name: name,
+        email: email,
+      },
+      credit_card: {
+        secure: true,
+      },
+    };
 
-  handleWebhook(payload: any) {
-    this.logger.log('Received webhook: ' + JSON.stringify(payload));
-    return { received: true };
+    return await this.snap.createTransaction(parameter);
   }
 }

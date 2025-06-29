@@ -1,17 +1,26 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) {}
 
-  @Post('initiate')
-  initiate(@Body('amount') amount: number) {
-    return this.paymentService.createPayment(Number(amount));
-  }
-
-  @Post('webhook')
-  webhook(@Body() body: any) {
-    return this.paymentService.handleWebhook(body);
+  @Post('create')
+  async createSnap(
+    @Body()
+    body: {
+      orderId: string;
+      amount: number;
+      name: string;
+      email: string;
+    },
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.paymentService.createTransaction(
+      body.orderId,
+      body.amount,
+      body.name,
+      body.email,
+    );
   }
 }
