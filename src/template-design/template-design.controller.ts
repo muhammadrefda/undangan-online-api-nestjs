@@ -21,17 +21,11 @@ export class TemplateDesignController {
   }
 
   @Get()
-  findAll() {
+  findTemplates(@Query('category') category?: string) {
+    if (category) {
+      return this.templateService.findByCategory(category);
+    }
     return this.templateService.findAll();
-  }
-
-  @Get('categories')
-  getCategories() {
-    return [
-      { key: 'semua', label: 'Semua' },
-      { key: 'premium', label: 'Premium' },
-      { key: 'eksklusif', label: 'Eksklusif' },
-    ];
   }
 
   @Get()
