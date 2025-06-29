@@ -57,6 +57,15 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Environment Variables
+
+Configure payment settings in your `.env` file:
+
+```
+PAYMENT_API_KEY=your-api-key-here
+PAYMENT_CALLBACK_URL=https://example.com/payment/webhook
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
