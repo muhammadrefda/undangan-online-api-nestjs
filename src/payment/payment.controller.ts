@@ -1,11 +1,14 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from './payment.service';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post('create')
+  @ApiTags('Payment')
+  @ApiOperation({ summary: 'Create a new payment transaction' })
   async createSnap(
     @Body()
     body: {
