@@ -5,6 +5,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ✅ Izinkan origin dari frontend production
+  app.enableCors({
+    origin: ['https://satuundangan.id', 'http://localhost:4000'],
+    credentials: true, // penting kalau pakai cookie atau header auth
+  });
+
   // Swagger config
   const config = new DocumentBuilder()
     .setTitle('Undangan Online API')
