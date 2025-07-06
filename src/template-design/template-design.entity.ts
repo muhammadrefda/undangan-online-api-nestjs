@@ -21,6 +21,18 @@ export class TemplateDesign {
   @Column({ type: 'varchar', length: 20 })
   category: string;
 
+  @Column({ type: 'text', nullable: true })
+  paletteColor: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  description: string;
+
+  @Column({ type: 'text', nullable: true })
+  tags: string;
+
+  @Column({ type: 'text', nullable: true })
+  sectionOptions: string;
+
   @OneToMany(() => Invitation, (invitation) => invitation.templateDesign)
   invitations: Invitation[];
 }
