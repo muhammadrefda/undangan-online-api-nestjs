@@ -18,6 +18,8 @@ export class User {
   @Column()
   provider: string;
 
-  @OneToMany(() => Invitation, (invitation) => invitation.user)
+  @OneToMany(() => Invitation, (invitation) => invitation.user, {
+    onDelete: 'CASCADE',
+  })
   invitations: Invitation[];
 }
