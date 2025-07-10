@@ -7,7 +7,11 @@ async function bootstrap() {
 
   // ✅ Izinkan origin dari frontend production
   app.enableCors({
-    origin: ['https://satuundangan.id', 'http://localhost:4000'],
+    origin: [
+      'https://satuundangan.id',
+      'http://localhost:4000',
+      'https://api.satuundangan.id',
+    ],
     credentials: true, // penting kalau pakai cookie atau header auth
   });
 
