@@ -6,6 +6,7 @@ import {
   IsArray,
   ValidateNested,
   IsEnum,
+  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -210,4 +211,8 @@ export class CreateInvitationDto {
   @ApiProperty({ example: true })
   @IsBoolean()
   enableGuestMessage: boolean;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  templateDesignId: number;
 }

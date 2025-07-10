@@ -24,8 +24,11 @@ export class Invitation {
   @Column({ nullable: true })
   coupleName: string;
 
-  @Column({ nullable: true })
-  templateName: string;
+  @Column({ nullable: false })
+  groomName: string;
+
+  @Column({ nullable: false })
+  brideName: string;
 
   @Column({ default: false })
   isPublished: boolean;
