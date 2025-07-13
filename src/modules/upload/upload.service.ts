@@ -20,7 +20,9 @@ export class UploadService {
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
       credentials: {
         accessKeyId: this.configService.getOrThrow<string>('R2_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.getOrThrow<string>('R2_SECRET_ACCESS_KEY'),
+        secretAccessKey: this.configService.getOrThrow<string>(
+          'R2_SECRET_ACCESS_KEY',
+        ),
       },
     });
   }

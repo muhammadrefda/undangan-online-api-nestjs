@@ -6,9 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { TemplateDesign } from '../template-design/template-design.entity';
+import { GuestMessage } from '../guest-messages/guest-message.entity';
 
 @Entity()
 export class Invitation {
@@ -124,6 +126,9 @@ export class Invitation {
 
   @Column({ nullable: true })
   templateDesignId: number;
+
+  @OneToMany(() => GuestMessage, (gm) => gm.invitation)
+  guestMessages: GuestMessage[];
 
   @Column({ type: 'simple-array', nullable: true })
   selectedSections: string[];

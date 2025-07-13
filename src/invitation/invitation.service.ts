@@ -22,7 +22,7 @@ export class InvitationService {
     const invitation = this.invitationRepo.create({ ...dto, user });
     // Slug generation
     if (!dto.slug) {
-      const base :string = slugify(dto.coupleName || dto.title || 'undangan', {
+      const base: string = slugify(dto.coupleName || dto.title || 'undangan', {
         lower: true,
         strict: true,
       });
