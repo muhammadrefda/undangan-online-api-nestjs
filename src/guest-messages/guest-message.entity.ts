@@ -18,6 +18,12 @@ export class GuestMessage {
   @Column('text')
   message: string;
 
+  @Column('text')
+  rsvpStatus: string;
+
+  @Column('int')
+  totalGuests: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

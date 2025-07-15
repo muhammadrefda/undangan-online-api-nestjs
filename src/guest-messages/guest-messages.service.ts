@@ -27,6 +27,8 @@ export class GuestMessagesService {
     const guestMessage = this.guestMessageRepo.create({
       guestName: dto.guestName,
       message: dto.message,
+      rsvpStatus: dto.rsvpStatus,
+      totalGuests: dto.totalGuests,
       invitation,
     });
 

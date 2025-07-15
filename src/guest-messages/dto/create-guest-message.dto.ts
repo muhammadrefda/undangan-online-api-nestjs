@@ -12,4 +12,12 @@ export class CreateGuestMessageDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  @IsString()
+  @IsNotEmpty()
+  rsvpStatus: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  totalGuests: number;
 }
