@@ -6,6 +6,7 @@ import { Invitation } from 'src/invitation/invitation.entity';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import * as xlsx from 'xlsx';
 import * as fs from 'fs';
+import { slugify } from 'transliteration';
 
 @Injectable()
 export class GuestService {
@@ -98,10 +99,12 @@ export class GuestService {
       const name = ((row['Name'] as string) || '').toString();
       const degree = ((row['Degree'] as string) || '').toString();
       const phoneNumber = ((row['Phone Number'] as string) || '').toString();
-      const slug = ((row['Slug'] as string) || '').toString();
+      const rawSlug = ((row['Slug'] as string) || '').toString().trim();
+      const invitationId = Number(row['Invitation ID']);
+      const slug =
+        rawSlug || (await this.generateUniqueSlug(name, invitationId));
       const group = ((row['Group'] as string) || '').toString();
       const statusSend = ((row['Status Send'] as string) || '').toString();
-      const invitationId = Number(row['Invitation ID']);
 
       if (!name || isNaN(invitationId) || !slug) {
         console.warn(
@@ -126,5 +129,31 @@ export class GuestService {
     }
 
     return this.guestRepo.save(guestsToSave);
+  }
+
+  async generateUniqueSlug(
+    name: string,
+    invitationId: number,
+  ): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const baseSlug = slugify(name.toLowerCase());
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (
+      await this.guestRepo.findOne({
+        where: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          slug,
+          invitation: { id: invitationId },
+        },
+      })
+    ) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return slug;
   }
 }
