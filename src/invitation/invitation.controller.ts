@@ -67,6 +67,14 @@ export class InvitationController {
     return this.invitationService.findBySlug(slug);
   }
 
+  @Get('slug/:invitationSlug/guest/:guestSlug')
+  async getInvitationWithGuest(
+    @Param('invitationSlug') invitationSlug: string,
+    @Param('guestSlug') guestSlug: string,
+  ) {
+    return this.invitationService.findWithGuest(invitationSlug, guestSlug);
+  }
+
   @Get('categories')
   @ApiTags('Invitation')
   @ApiOperation({ summary: 'Get invitation categories' })

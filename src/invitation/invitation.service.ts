@@ -90,4 +90,18 @@ export class InvitationService {
 
     return invitation;
   }
+
+  async findWithGuest(invitationSlug: string, guestSlug: string) {
+    const invitation = await this.invitationRepo.findOne({
+      where: { slug: invitationSlug },
+      relations: ['guests'],
+    });
+
+    if (!invitation) throw new NotFoundException('Invitation not found');
+
+    const guest = invitation.guests.find((g) => g.slug === guestSlug);
+    if (!guest) throw new NotFoundException('Guest not found');
+
+    return { invitation, guest };
+  }
 }
