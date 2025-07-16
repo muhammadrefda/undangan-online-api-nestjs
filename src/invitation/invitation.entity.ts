@@ -11,6 +11,7 @@ import {
 import { User } from '../user/user.entity';
 import { TemplateDesign } from '../template-design/template-design.entity';
 import { GuestMessage } from '../guest-messages/guest-message.entity';
+import { Guest } from 'src/dashboard-user/guest/guest.entity';
 
 @Entity()
 export class Invitation {
@@ -132,6 +133,9 @@ export class Invitation {
 
   @Column({ type: 'simple-array', nullable: true })
   selectedSections: string[];
+
+  @OneToMany(() => Guest, guest => guest.invitation)
+  guests: Guest[];
 
   @CreateDateColumn()
   createdAt: Date;
