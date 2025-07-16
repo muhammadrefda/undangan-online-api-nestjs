@@ -1,43 +1,38 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  PrimaryGeneratedColumn,
   ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn
+  JoinColumn,
 } from 'typeorm';
-import { Invitation } from 'src/invitation/invitation.entity';
+import { Invitation } from '../../invitation/invitation.entity';
 
-@Entity()
+@Entity('guest')
 export class Guest {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    degree: string;
+  @Column({ nullable: true })
+  degree: string;
 
-    @Column()
-    phone: string;
+  @Column({ name: 'phone_number', nullable: true })
+  phoneNumber: string;
 
-    @Column({ unique: true })
-    slug: string;
+  @Column()
+  slug: string;
 
-    @Column()
-    group: string;
+  @Column({ nullable: true })
+  group: string;
 
-    @Column({ default: 'pending' })
-    statusSend: string;
+  @Column({ name: 'status_send', nullable: true })
+  statusSend: string;
 
-    @ManyToOne(() => Invitation, invitation => invitation.guests)
-    invitation: Invitation;
-    
-    
-    @CreateDateColumn()
-      createdAt: Date;
-    
-      @UpdateDateColumn()
-      updatedAt: Date;
+  @ManyToOne(() => Invitation, (invitation) => invitation.guests, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'invitation_id' })
+  invitation: Invitation;
 }

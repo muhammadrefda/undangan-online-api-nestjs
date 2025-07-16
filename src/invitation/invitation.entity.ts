@@ -134,7 +134,7 @@ export class Invitation {
   @Column({ type: 'simple-array', nullable: true })
   selectedSections: string[];
 
-  @OneToMany(() => Guest, guest => guest.invitation)
+  @OneToMany(() => Guest, (guest) => guest.invitation)
   guests: Guest[];
 
   @CreateDateColumn()

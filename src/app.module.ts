@@ -32,7 +32,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PaymentModule,
     UploadModule,
     GuestMessagesModule,
-    GuestModule, 
+    GuestModule,
   ],
 })
 export class AppModule {}
