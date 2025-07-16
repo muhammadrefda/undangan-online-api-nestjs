@@ -6,6 +6,7 @@ import { TemplateDesignModule } from './template-design/template-design.module';
 import { PaymentModule } from './payment/payment.module';
 import { GuestMessagesModule } from './guest-messages/guest-messages.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { GuestModule } from './dashboard-user/guest/guest.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -31,6 +32,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PaymentModule,
     UploadModule,
     GuestMessagesModule,
+    GuestModule, 
   ],
 })
 export class AppModule {}
