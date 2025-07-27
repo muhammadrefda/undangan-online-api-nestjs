@@ -41,4 +41,14 @@ export class GuestMessagesService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  async getAll(): Promise<GuestMessage[]> {
+    const messages = await this.guestMessageRepo.find({
+      order: { createdAt: 'DESC' },
+    });
+    if (!messages.length) {
+      throw new NotFoundException('No guest messages found');
+    }
+    return messages;
+  }
 }
