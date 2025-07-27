@@ -1,9 +1,18 @@
-import { Body, Controller, Post, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Req,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,13 +36,17 @@ export class AuthController {
   @Get('google')
   @ApiOperation({ summary: 'Login dengan Google' })
   @UseGuards(AuthGuard('google'))
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async googleAuth() {}
 
   @Get('google/redirect')
   @ApiOperation({ summary: 'Redirect setelah login dengan Google' })
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req: any) {
-    return this.authService.googleLogin(req.user);
+  googleAuthRedirect(@Req() req: any, @Res() res: Response) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const { access_token } = this.authService.googleLogin(req.user);
+
+    res.redirect(
+      `http://localhost:5173/auth/google/callback?token=${access_token}`,
+    );
   }
 }

@@ -12,6 +12,11 @@ import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
+type UserType = {
+  id: number;
+  email: string;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -55,11 +60,14 @@ export class AuthService {
   }
 
   // untuk Google OAuth
-  async googleLogin(user: User) {
-    return this._createToken(user.id, user.email);
+  googleLogin(user: UserType): { access_token: string } {
+    return this._createToken(user.id, user?.email);
   }
 
-  private _createToken(userId: number, email: string) {
+  private _createToken(
+    userId: number,
+    email: string,
+  ): { access_token: string } {
     const payload = { sub: userId, email };
     return { access_token: this.jwtService.sign(payload) };
   }
