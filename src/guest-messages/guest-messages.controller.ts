@@ -28,12 +28,13 @@ export class GuestMessagesController {
     status: 201,
     description: 'The guest message has been successfully created.',
   })
-  createMessage(@Body() dto: CreateGuestMessageDto) {
-    return this.guestMessagesService.create(dto).then((created) => ({
+  async createMessage(@Body() dto: CreateGuestMessageDto) {
+    const created = await this.guestMessagesService.create(dto);
+    return {
       success: true,
       message: 'Message created successfully',
       data: created,
-    }));
+    };
   }
 
   @Get('invitation/:invitationId')
@@ -43,14 +44,28 @@ export class GuestMessagesController {
     status: 200,
     description: 'List of guest messages for the invitation',
   })
-  getMessagesByInvitation(
+  async getMessagesByInvitation(
     @Param('invitationId', ParseIntPipe) invitationId: number,
   ) {
-    return this.guestMessagesService
-      .findByInvitationId(invitationId)
-      .then((messages) => ({
-        success: true,
-        data: messages,
-      }));
+    const messages =
+      await this.guestMessagesService.findByInvitationId(invitationId);
+    return {
+      success: true,
+      data: messages,
+    };
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all guest messages' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all guest messages',
+  })
+  async getAllMessages(): Promise<{ success: boolean; data: any[] }> {
+    const messages = await this.guestMessagesService.getAll();
+    return {
+      success: true,
+      data: messages,
+    };
   }
 }
