@@ -72,20 +72,29 @@ export class TemplateDesignService {
   private transformPalette(template: TemplateDesign): TemplateDesign {
     if (template.paletteColor) {
       try {
-        template.paletteColor = JSON.parse(template.paletteColor);
+        template.paletteColor = JSON.parse(template.paletteColor) as string;
       } catch (err: any) {
         console.warn(
           `Gagal parsing paletteColor untuk template ${template.id}`,
         );
+        throw new Error(`Error parsing paletteColor: ${err}`);
       }
     }
-    if (template.tags) {
-      try {
-        template.tags = JSON.parse(template.tags);
-      } catch (err: any) {
-        console.warn(`Gagal parsing tags untuk template ${template.id}`);
+    if (typeof template.tags === 'string') {
+      {
+        try {
+          template.tags = JSON.parse(template.tags) as string;
+        } catch (err: any) {
+          console.warn(`Gagal parsing tags untuk template ${template.id}`);
+          throw new Error(`Error parsing tags: ${err}`);
+        }
       }
     }
     return template;
+  }
+
+  private async getAllTemplateDesigns(): Promise<TemplateDesign[]> {
+    const templates = await this.templateRepo.find();
+    return templates.map((t) => this.transformPalette(t));
   }
 }

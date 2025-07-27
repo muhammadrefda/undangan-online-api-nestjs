@@ -64,6 +64,14 @@ export class TemplateDesignController {
   remove(@Param('id') id: string) {
     return this.templateService.remove(+id);
   }
+
+  @Get()
+  @ApiTags('Template Design')
+  @ApiOperation({ summary: 'Get all template designs' })
+  findAll(): Promise<TemplateDesign[]> {
+    return this.templateService.findAll();
+  }
+
   // @Get()
   // getTemplates(@Query('category') category?: string) {
   //   if (category) {
