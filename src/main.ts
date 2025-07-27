@@ -11,7 +11,9 @@ async function bootstrap() {
       'https://satuundangan.id',
       'http://localhost:4000',
       'https://api.satuundangan.id',
+      'http://localhost:5173',
     ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true, // penting kalau pakai cookie atau header auth
   });
 
