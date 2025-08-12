@@ -41,12 +41,15 @@ export class AuthController {
   @Get('google/redirect')
   @ApiOperation({ summary: 'Redirect setelah login dengan Google' })
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req: any, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const { access_token } = this.authService.googleLogin(req.user);
-
+    const { access_token } = await this.authService.googleLogin(req.user);
+    const frontendUrl = process.env.FRONTEND_URL_PRODUCTION;
+    if (!frontendUrl) {
+      throw new Error('Frontend URL is not configured');
+    }
     res.redirect(
-      `http://localhost:5173/auth/google/callback?token=${access_token}`,
+      `${frontendUrl}/auth/google/callback?token=${access_token}`,
     );
   }
 }

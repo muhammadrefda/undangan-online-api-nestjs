@@ -60,7 +60,7 @@ export class AuthService {
   }
 
   // untuk Google OAuth
-  googleLogin(user: UserType): { access_token: string } {
+  async googleLogin(user: UserType): Promise<{ access_token: string }> {
     return this._createToken(user.id, user?.email);
   }
 
