@@ -14,12 +14,20 @@ import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService
+  ) {
+  }
+
   private readonly logger = new Logger(AuthController.name);
+
   @Post('register')
   @ApiOperation({ summary: 'Register user baru' })
   @ApiBody({ type: RegisterDto })
@@ -45,53 +53,21 @@ export class AuthController {
   @Get('google')
   @ApiOperation({ summary: 'Login dengan Google' })
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
+  async googleAuth(@Req() req) {
+  }
 
   @Get('google/redirect')
-  @ApiOperation({ summary: 'Redirect setelah login dengan Google' })
- @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
-    this.logger.log('Google redirect endpoint dipanggil.');
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+    const user = req.user; // ini user dari GoogleStrategy.validate()
 
-    if (!req.user) {
-      this.logger.error('req.user tidak ditemukan setelah Google Guard.');
-      return res.redirect(
-        `${process.env.FRONTEND_URL_PRODUCTION ?? 'http://localhost:3000'}/login-gagal`,
-      );
-    }
+    // generate JWT pakai user.id & email
+    const payload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(payload);
 
-    this.logger.log(
-      `Data user dari Google diterima: ${JSON.stringify(req.user)}`,
-    );
-
-    try {
-      this.logger.log('Memanggil authService.googleLogin...');
-      const { access_token } = await this.authService.googleLogin(req.user);
-
-      if (!access_token) {
-        this.logger.error('Token gagal dibuat.');
-        return res.redirect(
-          `${process.env.FRONTEND_URL_PRODUCTION ?? 'http://localhost:3000'}/login-gagal?error=token_failed`,
-        );
-      }
-
-      const frontendUrl =
-        process.env.FRONTEND_URL_PRODUCTION ?? 'http://localhost:3000';
-
-      this.logger.log(`Frontend URL: ${frontendUrl}`);
-
-      const redirectUrl = `${frontendUrl}/auth/google/callback?token=${access_token}`;
-      this.logger.log(`Mengarahkan ke: ${redirectUrl}`);
-
-      return res.redirect(redirectUrl);
-    } catch (error) {
-      this.logger.error(
-        `Terjadi error di dalam googleAuthRedirect: ${error.message}`,
-        error.stack,
-      );
-      return res.redirect(
-        `${process.env.FRONTEND_URL_PRODUCTION ?? 'http://localhost:3000'}/login-gagal?error=server_error`,
-      );
-    }
+    // bisa redirect ke frontend sambil bawa token
+    return res.redirect(`http://localhost:5173?token=${token}`);
+    // atau kalau tes API langsung:
+    // return res.json({ access_token: token });
   }
 }
