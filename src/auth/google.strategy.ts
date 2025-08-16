@@ -27,9 +27,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: any,
   ): Promise<User> {
+
+    console.log('--- VALIDATE METHOD TRIGGERED ---');
+
     const email = profile.emails?.[0]?.value;
 
     if (!email) {
+      console.error('Email not found in Google profile'); // <--- Tambahkan ini
       throw new UnauthorizedException('Email tidak ditemukan dari Google');
     }
 
