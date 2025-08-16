@@ -61,20 +61,25 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const user = req.user; // ini user dari GoogleStrategy.validate()
+    const user = req.user;
 
-    // generate JWT pakai user.id & email
+    if (!user) {
+      // kalau gagal ambil user dari google
+      return res.redirect(
+        `${this.configService.get<string>('FRONTEND_URL_PRODUCTION')}/?error=login_failed`
+      );
+    }
+
+    // generate JWT
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
     const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL_PRODUCTION') ||
-      'http://localhost:5173';
+      process.env.NODE_ENV === 'production'
+        ? this.configService.get<string>('FRONTEND_URL_PRODUCTION')
+        : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT');
 
-    console.log(process.env.FRONTEND_URL_PRODUCTION)
-
-    //return res.redirect(`${clientUrl}/?token=${token}`);
+    // redirect ke FE callback
     return res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
-
   }
 }
