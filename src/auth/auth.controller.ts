@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 
 @ApiTags('Auth')
@@ -22,7 +23,8 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private configService: ConfigService
   ) {
   }
 
@@ -65,9 +67,8 @@ export class AuthController {
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
-    // bisa redirect ke frontend sambil bawa token
-    return res.redirect(`http://localhost:5173?token=${token}`);
-    // atau kalau tes API langsung:
-    // return res.json({ access_token: token });
+    const clientUrl = this.configService.get<string>('FRONTEND_URL_PRODUCTION') || 'http://localhost:5173';
+
+    return res.redirect(`${clientUrl}/?token=${token}`);
   }
 }
