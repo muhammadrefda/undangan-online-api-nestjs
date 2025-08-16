@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-google-oauth20';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,6 +28,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
   ): Promise<User> {
     const email = profile.emails?.[0]?.value;
+
+    if (!email) {
+      throw new UnauthorizedException('Email tidak ditemukan dari Google');
+    }
+
     let user = await this.userRepo.findOne({ where: { email } });
 
     if (!user) {

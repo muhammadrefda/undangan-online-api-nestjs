@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { InvitationModule } from './invitation/invitation.module';
@@ -9,6 +9,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { GuestModule } from './dashboard-user/guest/guest.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LogTokenMiddleware } from './common/middleware/log-token.middleware';
 
 @Module({
   imports: [
@@ -35,4 +36,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     GuestModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LogTokenMiddleware).forRoutes('*'); // Semua route
+  }
+}
