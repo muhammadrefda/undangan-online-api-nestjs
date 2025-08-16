@@ -34,6 +34,14 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Get('test-log')
+  testLog() {
+    console.log('--- INI ADALAH LOG DARI CONSOLE.LOG ---');
+    this.logger.log('--- INI ADALAH LOG DARI NESTJS LOGGER ---');
+    this.logger.error('--- INI ADALAH LOG ERROR ---');
+    return { message: 'Log test endpoint has been called!' };
+  }
+
   @Get('google')
   @ApiOperation({ summary: 'Login dengan Google' })
   @UseGuards(AuthGuard('google'))
