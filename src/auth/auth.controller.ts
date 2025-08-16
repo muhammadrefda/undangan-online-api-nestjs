@@ -95,5 +95,4 @@ export class AuthController {
     //   `${frontendUrl}/auth/google/callback?token=${access_token}`,
     // );
   }
-
 }
