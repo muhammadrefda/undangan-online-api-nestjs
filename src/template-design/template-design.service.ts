@@ -20,6 +20,10 @@ export class TemplateDesignService {
       data.paletteColor = JSON.stringify(data.paletteColor);
     }
 
+    if (typeof data.sectionOptions === 'object') {
+      data.sectionOptions = JSON.stringify(data.sectionOptions);
+    }
+
     if (Array.isArray(data.tags)) {
       data.tags = JSON.stringify(data.tags);
     }
@@ -46,13 +50,21 @@ export class TemplateDesignService {
     id: number,
     data: Partial<TemplateDesign>,
   ): Promise<TemplateDesign> {
-    const template = await this.findById(id);
-    if (data.paletteColor && typeof data.paletteColor === 'object') {
-      data.paletteColor = JSON.stringify(data.paletteColor);
+    const dataToUpdate = { ...data };
+    if (
+      dataToUpdate.paletteColor &&
+      typeof dataToUpdate.paletteColor === 'object'
+    ) {
+      dataToUpdate.paletteColor = JSON.stringify(dataToUpdate.paletteColor);
     }
-    Object.assign(template, data);
-    const updated = await this.templateRepo.save(template);
-    return this.transformPalette(updated);
+    if (dataToUpdate.tags && Array.isArray(dataToUpdate.tags)) {
+      dataToUpdate.tags = (dataToUpdate.tags as string[]).join(', ');
+    }
+
+    await this.templateRepo.update(id, dataToUpdate);
+
+    const updatedTemplate = await this.findById(id);
+    return updatedTemplate;
   }
 
   async remove(id: number): Promise<void> {
