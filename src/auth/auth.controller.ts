@@ -74,12 +74,10 @@ export class AuthController {
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
-    const frontendUrl =
-      process.env.NODE_ENV === 'production'
-        ? this.configService.get<string>('FRONTEND_URL_PRODUCTION')
-        : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT');
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL_PRODUCTION');
 
     // redirect ke FE callback
     return res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
   }
+
 }
