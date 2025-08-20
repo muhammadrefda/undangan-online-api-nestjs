@@ -9,6 +9,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://satuundangan.id',
+      'https://www.satuundangan.id',
       'http://localhost:4000',
       'https://api.satuundangan.id',
       'http://localhost:5173',
