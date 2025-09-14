@@ -16,7 +16,7 @@ import { Response } from 'express';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-
+import { User } from '../user/user.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,9 +24,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
-    private configService: ConfigService
-  ) {
-  }
+    private configService: ConfigService,
+  ) {}
 
   private readonly logger = new Logger(AuthController.name);
 
@@ -61,23 +60,24 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const user = req.user;
-
+    const user = req.user as User;
+    console.log('HIT googleAuthRedirect route');
+    console.log('req.user:', req.user);
     if (!user) {
-      // kalau gagal ambil user dari google
-      return res.redirect(
-        `${this.configService.get<string>('FRONTEND_URL_PRODUCTION')}/?error=login_failed`
-      );
+      const errorUrl = process.env.NODE_ENV === 'development'
+        ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
+        : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
+
+      return res.redirect(`${errorUrl}/?error=login_failed`)
     }
 
-    // generate JWT
-    const payload = { sub: user.id, email: user.email };
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign({ sub: user.id, email: user.email })
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL_PRODUCTION');
+    const frontendUrl = process.env.NODE_ENV === 'development'
+      ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
+      : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
 
-    // redirect ke FE callback
-    return res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
+    return res.redirect(`${frontendUrl}/auth/callback?token=${token}`)
   }
 
 }

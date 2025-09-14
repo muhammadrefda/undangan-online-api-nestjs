@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../user/user.entity';
-import { VerifyCallback } from 'passport-jwt';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -21,22 +20,34 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: config.get<string>('GOOGLE_CALLBACK_URL'),
       scope: ['email', 'profile'],
     });
-
-    console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID);
-    console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
   }
 
 
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: VerifiedCallback): Promise<any> {
-    const { emails } = profile;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { emails, displayName } = profile;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const email = emails?.[0]?.value;
 
-    const user = {
-      id: profile.id,
-      email: emails?.[0]?.value,
-    };
-    this.logger.log(`Google user authenticated: ${user.email}`);
+    // Cari user di DB
+    let user = await this.userRepo.findOne({ where: { email } });
+
+    if (!user) {
+      user = this.userRepo.create({
+        name: displayName,
+        email,
+        provider: 'google',
+        password: null,
+      });
+      user = await this.userRepo.save(user);
+    }
+
+    this.logger.log(`Google user authenticated: ${email}`);
+    console.log('Validate user from DB:', user);
+    this.logger.log('Validate user profile:', profile);
+    this.logger.log('User from DB (or created):', user);
+
     done(null, user);
   }
-
 }

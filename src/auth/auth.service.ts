@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Logger } from '@nestjs/common';
 
 type UserType = {
   id: number;
@@ -51,16 +52,25 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) {
+      Logger.log('Failed login attempt for email:', dto.email);
+      throw new UnauthorizedException('User not found');
+    }
 
-    const passwordMatch = await bcrypt.compare(dto.password, user.password);
-    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+    let passwordMatch: string | boolean = false;
+    if (typeof user.password === 'string') {
+      passwordMatch = await bcrypt.compare(dto.password, user.password);
+    }
 
+    if (!passwordMatch) {
+      Logger.log('User password not matched for email:', dto.email);
+      throw new UnauthorizedException('Password not matched');
+    }
+    Logger.log('User logged in successfully:', dto.email);
     return this._createToken(user.id, user.email);
   }
 
-  // untuk Google OAuth
-  async googleLogin(user: UserType): Promise<{ access_token: string }> {
+  googleLogin(user: UserType): { access_token: string } {
     return this._createToken(user.id, user?.email);
   }
 
@@ -69,6 +79,20 @@ export class AuthService {
     email: string,
   ): { access_token: string } {
     const payload = { sub: userId, email };
+    Logger.log(`Creating JWT for userId: ${userId}, email: ${email}`);
     return { access_token: this.jwtService.sign(payload) };
+  }
+
+  async findByEmail(email: string) {
+    return this.userRepo.findOne({ where: { email } });
+  }
+
+  async createUserFromGoogle(googleUser: any) {
+    const newUser = this.userRepo.create({
+      name: googleUser.name,
+      email: googleUser.email,
+      provider: 'google',
+    });
+    return await this.userRepo.save(newUser);
   }
 }
