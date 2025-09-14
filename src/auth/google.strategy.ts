@@ -12,8 +12,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
-    config: ConfigService,
-  ) {
+    private readonly config: ConfigService,
+    ) {
     super({
       clientID: config.get<string>('GOOGLE_CLIENT_ID'),
       clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET'),
@@ -22,9 +22,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-
-
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifiedCallback): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifiedCallback,
+  ): Promise<any> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { emails, displayName } = profile;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -47,6 +50,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     console.log('Validate user from DB:', user);
     this.logger.log('Validate user profile:', profile);
     this.logger.log('User from DB (or created):', user);
+
+    console.log(
+      'GoogleStrategy callbackURL:',
+      this.config.get<string>('GOOGLE_CALLBACK_URL'),
+    );
 
     done(null, user);
   }

@@ -54,30 +54,24 @@ export class AuthController {
   @Get('google')
   @ApiOperation({ summary: 'Login dengan Google' })
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {
-  }
+  async googleAuth(@Req() req) {}
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user = req.user as User;
+
     console.log('HIT googleAuthRedirect route');
     console.log('req.user:', req.user);
-    if (!user) {
-      const errorUrl = process.env.NODE_ENV === 'development'
-        ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
-        : this.configService.get<string>('FRONTEND_URL_PRODUCTION')
 
-      return res.redirect(`${errorUrl}/?error=login_failed`)
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    if (!user) {
+      const errorUrl = this.configService.get<string>('FRONTEND_URL');
+      return res.redirect(`${errorUrl}/?error=login_failed`);
     }
 
-    const token = this.jwtService.sign({ sub: user.id, email: user.email })
+    const token = this.jwtService.sign({ sub: user.id, email: user.email });
 
-    const frontendUrl = process.env.NODE_ENV === 'development'
-      ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
-      : this.configService.get<string>('FRONTEND_URL_PRODUCTION')
-
-    return res.redirect(`${frontendUrl}/auth/callback?token=${token}`)
+    return res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
   }
-
 }
