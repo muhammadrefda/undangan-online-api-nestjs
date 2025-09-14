@@ -66,7 +66,7 @@ export class AuthController {
     if (!user) {
       const errorUrl = process.env.NODE_ENV === 'development'
         ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
-        : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
+        : this.configService.get<string>('FRONTEND_URL_PRODUCTION')
 
       return res.redirect(`${errorUrl}/?error=login_failed`)
     }
@@ -75,7 +75,7 @@ export class AuthController {
 
     const frontendUrl = process.env.NODE_ENV === 'development'
       ? this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
-      : this.configService.get<string>('FRONTEND_URL_DEVELOPMENT')
+      : this.configService.get<string>('FRONTEND_URL_PRODUCTION')
 
     return res.redirect(`${frontendUrl}/auth/callback?token=${token}`)
   }
