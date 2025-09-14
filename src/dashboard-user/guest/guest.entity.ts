@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Invitation } from '../../invitation/invitation.entity';
+import { GuestMessage } from '../../guest-messages/guest-message.entity';
 
 @Entity('guest')
 export class Guest {
@@ -30,9 +32,21 @@ export class Guest {
   @Column({ name: 'status_send', nullable: true })
   statusSend: string;
 
+  @Column({ name: 'rsvp_status', nullable: true, default: 'belum' })
+  rsvpStatus: string;
+
+  @Column({ name: 'first_visit_at', type: 'datetime', nullable: true })
+  firstVisitAt: Date | null;
+
+  @Column({ name: 'visit_count', type: 'int', default: 0 })
+  visitCount: number;
+
   @ManyToOne(() => Invitation, (invitation) => invitation.guests, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'invitation_id' })
   invitation: Invitation;
+
+  @OneToMany(() => GuestMessage, (gm) => gm.guest)
+  messages: GuestMessage[];
 }

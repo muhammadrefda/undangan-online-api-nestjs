@@ -10,12 +10,15 @@ import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { UpdateInvitationDto } from './dto/update-invitation.dto';
 import { User } from '../user/user.entity';
 import slugify from 'slugify';
+import { Guest } from '../dashboard-user/guest/guest.entity';
 
 @Injectable()
 export class InvitationService {
   constructor(
     @InjectRepository(Invitation)
     private readonly invitationRepo: Repository<Invitation>,
+    @InjectRepository(Guest)
+    private readonly guestRepo: Repository<Guest>,
   ) {}
 
   async create(dto: CreateInvitationDto, user: User): Promise<Invitation> {
@@ -102,6 +105,14 @@ export class InvitationService {
     const guest = invitation.guests.find((g) => g.slug === guestSlug);
     if (!guest) throw new NotFoundException('Guest not found');
 
-    return { invitation, guest };
+    // track first visit and increment visit count
+    const needsUpdate = !guest.firstVisitAt;
+    guest.visitCount = (guest.visitCount || 0) + 1;
+    if (!guest.firstVisitAt) {
+      guest.firstVisitAt = new Date();
+    }
+    await this.guestRepo.save(guest);
+
+    return { invitation, guest, tracked: { updatedFirstVisit: needsUpdate } };
   }
 }

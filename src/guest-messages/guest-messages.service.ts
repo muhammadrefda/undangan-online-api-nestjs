@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { GuestMessage } from './guest-message.entity';
 import { CreateGuestMessageDto } from './dto/create-guest-message.dto';
 import { Invitation } from '../invitation/invitation.entity';
+import { Guest } from '../dashboard-user/guest/guest.entity';
 
 @Injectable()
 export class GuestMessagesService {
@@ -13,6 +14,8 @@ export class GuestMessagesService {
 
     @InjectRepository(Invitation)
     private readonly invitationRepo: Repository<Invitation>,
+    @InjectRepository(Guest)
+    private readonly guestRepo: Repository<Guest>,
   ) {}
 
   async create(dto: CreateGuestMessageDto): Promise<GuestMessage> {
@@ -24,15 +27,36 @@ export class GuestMessagesService {
       throw new NotFoundException('Invitation not found');
     }
 
+    let guest: Guest | null = null;
+
+    if (dto.guestId) {
+      guest = await this.guestRepo.findOne({
+        where: { id: dto.guestId, invitation: { id: dto.invitationId } },
+      });
+    } else if (dto.guestSlug) {
+      guest = await this.guestRepo.findOne({
+        where: { slug: dto.guestSlug, invitation: { id: dto.invitationId } },
+      });
+    }
+
     const guestMessage = this.guestMessageRepo.create({
       guestName: dto.guestName,
       message: dto.message,
       rsvpStatus: dto.rsvpStatus,
       totalGuests: dto.totalGuests,
       invitation,
+      guest: guest ?? null,
     });
 
-    return this.guestMessageRepo.save(guestMessage);
+    const saved = await this.guestMessageRepo.save(guestMessage);
+
+    // sync RSVP status on guest if linked
+    if (guest) {
+      guest.rsvpStatus = dto.rsvpStatus;
+      await this.guestRepo.save(guest);
+    }
+
+    return saved;
   }
 
   async findByInvitationId(invitationId: number): Promise<GuestMessage[]> {

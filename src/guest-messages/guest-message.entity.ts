@@ -4,8 +4,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Invitation } from '../invitation/invitation.entity';
+import { Guest } from '../dashboard-user/guest/guest.entity';
 
 @Entity('guest_messages')
 export class GuestMessage {
@@ -31,4 +33,11 @@ export class GuestMessage {
     onDelete: 'CASCADE',
   })
   invitation: Invitation;
+
+  @ManyToOne(() => Guest, (guest) => guest.messages, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'guest_id' })
+  guest: Guest | null;
 }

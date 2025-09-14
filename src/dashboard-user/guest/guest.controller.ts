@@ -32,6 +32,14 @@ export class GuestController {
     return this.guestService.findAllByInvitation(invitationId);
   }
 
+  // ✅ Get all guests by invitation with last message and tracking fields
+  @Get('invitation/:invitationId/with-messages')
+  findAllByInvitationWithMessages(
+    @Param('invitationId') invitationId: number,
+  ) {
+    return this.guestService.findAllByInvitationWithMessages(invitationId);
+  }
+
   // ✅ Delete guest
   @Delete(':id')
   remove(@Param('id') id: number) {
@@ -68,5 +76,11 @@ export class GuestController {
     fs.unlinkSync(filepath);
 
     return guests;
+  }
+
+  // ✅ Build share link and WhatsApp deeplink for a guest
+  @Get(':id/share')
+  async share(@Param('id') id: number) {
+    return this.guestService.buildWhatsAppLink(id);
   }
 }

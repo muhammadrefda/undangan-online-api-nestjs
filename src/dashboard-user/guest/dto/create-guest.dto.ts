@@ -10,14 +10,18 @@ export class CreateGuestDto {
   @IsOptional()
   phoneNumber?: string;
 
-  @IsNotEmpty()
-  slug: string;
+  @IsOptional()
+  slug?: string;
 
   @IsOptional()
   group?: string;
 
   @IsOptional()
   statusSend?: string;
+
+  @IsOptional()
+  @IsString()
+  rsvpStatus?: string;
 
   @IsNotEmpty()
   @IsNumber()

@@ -28,13 +28,18 @@ export class GuestService {
       );
     }
 
+    const slug = dto.slug && dto.slug.trim().length > 0
+      ? dto.slug
+      : await this.generateUniqueSlug(dto.name, dto.invitationId);
+
     const guest = this.guestRepo.create({
       name: dto.name,
       degree: dto.degree,
       phoneNumber: dto.phoneNumber,
-      slug: dto.slug,
+      slug,
       group: dto.group,
       statusSend: dto.statusSend,
+      rsvpStatus: dto.rsvpStatus ?? 'belum',
       invitation,
     });
 
@@ -105,6 +110,7 @@ export class GuestService {
         rawSlug || (await this.generateUniqueSlug(name, invitationId));
       const group = ((row['Group'] as string) || '').toString();
       const statusSend = ((row['Status Send'] as string) || '').toString();
+      const rsvpStatus = ((row['RSVP Status'] as string) || 'belum').toString();
 
       if (!name || isNaN(invitationId) || !slug) {
         console.warn(
@@ -122,6 +128,7 @@ export class GuestService {
         slug,
         group,
         statusSend,
+        rsvpStatus,
         invitation: { id: invitationId } as Invitation,
       });
 
@@ -155,5 +162,61 @@ export class GuestService {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return slug;
+  }
+
+  async buildInviteUrlForGuest(guestId: number): Promise<{ url: string }> {
+    const guest = await this.guestRepo.findOne({
+      where: { id: guestId },
+      relations: ['invitation'],
+    });
+    if (!guest) throw new NotFoundException('Guest not found');
+    const base = process.env.FRONTEND_URL || 'https://satuundangan.id';
+    const invitationSlug = guest.invitation?.slug;
+    if (!invitationSlug) throw new NotFoundException('Invitation slug missing');
+
+    let url = `${base.replace(/\/$/, '')}/inv/${invitationSlug}/${guest.slug}`;
+    if (guest.invitation.encryptedGuestName) {
+      const encoded = Buffer.from(guest.name, 'utf-8').toString('base64');
+      url += `?e=${encodeURIComponent(encoded)}`;
+    }
+    return { url };
+  }
+
+  async buildWhatsAppLink(guestId: number): Promise<{ url: string; waLink: string; message: string }> {
+    const { url } = await this.buildInviteUrlForGuest(guestId);
+    const guest = await this.guestRepo.findOne({ where: { id: guestId } });
+    if (!guest) throw new NotFoundException('Guest not found');
+    const name = guest.name?.split(' ')[0] || 'Teman';
+    const message = `Hai ${name}! Ini undangan pernikahan kami 🎉\nKlik untuk lihat: ${url}`;
+    const phone = (guest.phoneNumber || '').replace(/[^0-9]/g, '');
+    const waNumber = phone.startsWith('0') ? `62${phone.slice(1)}` : (phone.startsWith('62') ? phone : phone);
+    const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+    return { url, waLink, message };
+  }
+
+  async findAllByInvitationWithMessages(invitationId: number): Promise<{
+    id: number;
+    name: string;
+    phoneNumber: string;
+    slug: string;
+    rsvpStatus: string;
+    firstVisitAt: Date | null;
+    lastMessage?: string | null;
+  }[]> {
+    const guests = await this.guestRepo.find({
+      where: { invitation: { id: invitationId } },
+      relations: ['messages'],
+      order: { id: 'ASC' },
+    });
+
+    return guests.map((g) => ({
+      id: g.id,
+      name: g.name,
+      phoneNumber: g.phoneNumber,
+      slug: g.slug,
+      rsvpStatus: g.rsvpStatus,
+      firstVisitAt: g.firstVisitAt ?? null,
+      lastMessage: g.messages && g.messages.length > 0 ? g.messages.sort((a,b)=> (b.createdAt?.getTime?.()||0)-(a.createdAt?.getTime?.()||0))[0].message : null,
+    }));
   }
 }
