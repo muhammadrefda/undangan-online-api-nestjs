@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { CreateAdminUserDto, UpdateAdminUserDto } from './dto/admin-user.dto';
+import { CreateTemplateDesignDto, UpdateTemplateDesignDto } from './dto/template-design.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -87,5 +88,31 @@ export class AdminController {
   deleteGuestMessage(@Param('id') id: number) {
     return this.service.deleteGuestMessage(id);
   }
-}
 
+  // Template Designs
+  @Get('template-designs')
+  listTemplateDesigns(@Query() q: PaginationQueryDto) {
+    const { page = 1, limit = 20, q: search } = q;
+    return this.service.listTemplateDesigns(page, limit, search);
+  }
+
+  @Get('template-designs/:id')
+  getTemplateDesign(@Param('id') id: number) {
+    return this.service.getTemplateDesign(id);
+  }
+
+  @Post('template-designs')
+  createTemplateDesign(@Body() dto: CreateTemplateDesignDto) {
+    return this.service.createTemplateDesign(dto);
+  }
+
+  @Patch('template-designs/:id')
+  updateTemplateDesign(@Param('id') id: number, @Body() dto: UpdateTemplateDesignDto) {
+    return this.service.updateTemplateDesign(id, dto);
+  }
+
+  @Delete('template-designs/:id')
+  deleteTemplateDesign(@Param('id') id: number) {
+    return this.service.deleteTemplateDesign(id);
+  }
+}
