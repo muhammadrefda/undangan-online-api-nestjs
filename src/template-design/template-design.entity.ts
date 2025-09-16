@@ -25,7 +25,7 @@ export class TemplateDesign {
   paletteColor: string;
 
   @Column({ type: 'varchar', nullable: true })
-  description: string;
+  description: string | null;
 
   @Column({ type: 'text', nullable: true })
   tags: string;
