@@ -1,42 +1,28 @@
 import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
-import * as midtransClient from 'midtrans-client';
+import { Snap } from 'midtrans-client';
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Payment } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
-//TODO: soon need to create new file for midtrans notification payload
-export interface MidtransNotificationPayload {
-  order_id: string;
-  transaction_status: string;
-  payment_type: string;
-  gross_amount: string;
-  fraud_status: string;
-  signature_key: string;
-  status_code: string;
-  settlement_time?: string;
-}
-
-export interface PaymentResponse {
-  paymentType: string;
-  status: string;
-}
+import {
+  MidtransNotificationPayload,
+  PaymentStatus,
+} from './types/payment.type';
 
 @Injectable()
 export class PaymentService {
-  private snap: midtransClient.Snap;
+  private snap: Snap;
 
   constructor(
     private configService: ConfigService,
-
     @InjectRepository(Payment)
     private paymentRepo: Repository<Payment>,
   ) {
-    this.snap = new midtransClient.Snap({
+    this.snap = new Snap({
       isProduction: false,
-      serverKey: this.configService.get('SERVER_KEY'),
-      clientKey: this.configService.get('CLIENT_KEY'),
+      serverKey: this.configService.get('SERVER_KEY')!,
+      clientKey: this.configService.get('CLIENT_KEY')!,
     });
   }
 
@@ -60,7 +46,25 @@ export class PaymentService {
       },
     };
 
-    return await this.snap.createTransaction(parameter);
+    const transaction = await this.snap.createTransaction(parameter);
+
+    const payment = this.paymentRepo.create({
+      orderId,
+      amount: grossAmount,
+      name,
+      email,
+      paymentMethod: 'midtrans',
+      status: PaymentStatus.PENDING,
+      paymentType: null,
+      fraudStatus: null,
+    } as DeepPartial<Payment>);
+    await this.paymentRepo.save(payment);
+
+    return {
+      token: transaction.token,
+      redirect_url: transaction.redirect_url,
+      orderId,
+    };
   }
 
   async handleMidtransNotification(payload: MidtransNotificationPayload) {
@@ -75,8 +79,17 @@ export class PaymentService {
       settlement_time,
     } = payload;
 
-    // STEP 1: Validasi Signature
-    const serverKey: string | undefined = this.configService.get('SERVER_KEY');
+    // ✅ Kalau order_id dari test notif Midtrans, jangan paksa cek DB
+    if (order_id.startsWith('payment_notif_test')) {
+      console.log('📩 Received Midtrans TEST notification:', payload);
+      return {
+        orderId: order_id,
+        status: transaction_status,
+        note: 'Test notification',
+      };
+    }
+
+    const serverKey: string = this.configService.get('SERVER_KEY')!;
     const input: string = order_id + status_code + gross_amount + serverKey;
     const expectedSignature = crypto
       .createHash('sha512')
@@ -85,27 +98,31 @@ export class PaymentService {
 
     const isValid = expectedSignature === signature_key;
     if (!isValid) {
-      throw new Error('Invalid signature from Midtrans');
+      // 👉 Tambahin ini biar test notif dari Midtrans gak bikin error 500
+      console.warn(
+        '⚠️ Signature tidak valid (mungkin test notification dari Midtrans)',
+      );
+      return { orderId: order_id, status: 'signature_invalid_test_mode' };
     }
 
-    // STEP 2: Cari record payment berdasarkan order_id
-    const payment: Payment | null = await this.paymentRepo.findOne({
+    const payment = await this.paymentRepo.findOne({
       where: { orderId: order_id },
     });
     if (!payment) {
       throw new Error(`Payment with order_id ${order_id} not found`);
     }
 
-    // STEP 3: Update payment status berdasarkan notifikasi Midtrans
     if (transaction_status === 'settlement' && fraud_status === 'accept') {
-      payment.status = 'success';
+      payment.status = PaymentStatus.SUCCESS;
       payment.settlementTime = settlement_time
         ? new Date(settlement_time)
         : new Date();
     } else if (transaction_status === 'expire') {
-      payment.status = 'expired';
+      payment.status = PaymentStatus.EXPIRED;
     } else if (['deny', 'cancel'].includes(transaction_status)) {
-      payment.status = 'failure';
+      payment.status = PaymentStatus.FAILURE;
+    } else if (transaction_status === 'pending') {
+      payment.status = PaymentStatus.PENDING;
     } else {
       payment.status = transaction_status;
     }

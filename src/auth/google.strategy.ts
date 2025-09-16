@@ -13,7 +13,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly config: ConfigService,
-    ) {
+  ) {
     super({
       clientID: config.get<string>('GOOGLE_CLIENT_ID'),
       clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET'),

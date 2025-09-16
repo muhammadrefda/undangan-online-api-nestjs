@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PaymentStatus } from './types/payment.type';
 
 @Entity()
 export class Payment {
@@ -14,23 +15,26 @@ export class Payment {
   @Column({ type: 'varchar', length: 100 })
   orderId: string;
 
+  @Column({ type: 'varchar', length: 255 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  email: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  paymentMethod: string;
-
   @Column({ type: 'varchar', length: 50, nullable: true })
-  paymentType: string;
+  paymentType: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   transactionId: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  status: string;
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  status: PaymentStatus | string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  fraudStatus: string;
+  fraudStatus: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
   settlementTime: Date;

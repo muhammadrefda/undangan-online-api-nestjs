@@ -34,9 +34,7 @@ export class GuestController {
 
   // ✅ Get all guests by invitation with last message and tracking fields
   @Get('invitation/:invitationId/with-messages')
-  findAllByInvitationWithMessages(
-    @Param('invitationId') invitationId: number,
-  ) {
+  findAllByInvitationWithMessages(@Param('invitationId') invitationId: number) {
     return this.guestService.findAllByInvitationWithMessages(invitationId);
   }
 

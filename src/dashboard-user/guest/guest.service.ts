@@ -28,9 +28,10 @@ export class GuestService {
       );
     }
 
-    const slug = dto.slug && dto.slug.trim().length > 0
-      ? dto.slug
-      : await this.generateUniqueSlug(dto.name, dto.invitationId);
+    const slug =
+      dto.slug && dto.slug.trim().length > 0
+        ? dto.slug
+        : await this.generateUniqueSlug(dto.name, dto.invitationId);
 
     const guest = this.guestRepo.create({
       name: dto.name,
@@ -182,27 +183,35 @@ export class GuestService {
     return { url };
   }
 
-  async buildWhatsAppLink(guestId: number): Promise<{ url: string; waLink: string; message: string }> {
+  async buildWhatsAppLink(
+    guestId: number,
+  ): Promise<{ url: string; waLink: string; message: string }> {
     const { url } = await this.buildInviteUrlForGuest(guestId);
     const guest = await this.guestRepo.findOne({ where: { id: guestId } });
     if (!guest) throw new NotFoundException('Guest not found');
     const name = guest.name?.split(' ')[0] || 'Teman';
     const message = `Hai ${name}! Ini undangan pernikahan kami 🎉\nKlik untuk lihat: ${url}`;
     const phone = (guest.phoneNumber || '').replace(/[^0-9]/g, '');
-    const waNumber = phone.startsWith('0') ? `62${phone.slice(1)}` : (phone.startsWith('62') ? phone : phone);
+    const waNumber = phone.startsWith('0')
+      ? `62${phone.slice(1)}`
+      : phone.startsWith('62')
+        ? phone
+        : phone;
     const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
     return { url, waLink, message };
   }
 
-  async findAllByInvitationWithMessages(invitationId: number): Promise<{
-    id: number;
-    name: string;
-    phoneNumber: string;
-    slug: string;
-    rsvpStatus: string;
-    firstVisitAt: Date | null;
-    lastMessage?: string | null;
-  }[]> {
+  async findAllByInvitationWithMessages(invitationId: number): Promise<
+    {
+      id: number;
+      name: string;
+      phoneNumber: string;
+      slug: string;
+      rsvpStatus: string;
+      firstVisitAt: Date | null;
+      lastMessage?: string | null;
+    }[]
+  > {
     const guests = await this.guestRepo.find({
       where: { invitation: { id: invitationId } },
       relations: ['messages'],
@@ -216,7 +225,14 @@ export class GuestService {
       slug: g.slug,
       rsvpStatus: g.rsvpStatus,
       firstVisitAt: g.firstVisitAt ?? null,
-      lastMessage: g.messages && g.messages.length > 0 ? g.messages.sort((a,b)=> (b.createdAt?.getTime?.()||0)-(a.createdAt?.getTime?.()||0))[0].message : null,
+      lastMessage:
+        g.messages && g.messages.length > 0
+          ? g.messages.sort(
+              (a, b) =>
+                (b.createdAt?.getTime?.() || 0) -
+                (a.createdAt?.getTime?.() || 0),
+            )[0].message
+          : null,
     }));
   }
 }

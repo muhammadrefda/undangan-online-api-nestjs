@@ -61,8 +61,8 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user = req.user as User;
 
-    console.log('HIT googleAuthRedirect route');
-    console.log('req.user:', req.user);
+    //console.log('HIT googleAuthRedirect route');
+    //console.log('req.user:', req.user);
 
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     if (!user) {
