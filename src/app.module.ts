@@ -9,6 +9,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { GuestModule } from './dashboard-user/guest/guest.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     UploadModule,
     GuestMessagesModule,
     GuestModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
