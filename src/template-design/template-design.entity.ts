@@ -14,6 +14,9 @@ export class TemplateDesign {
 
   @Column()
   previewUrl: string;
+  
+  @Column()
+  thumbnailUrl: string;
 
   @Column({ default: true })
   isActive: boolean;
